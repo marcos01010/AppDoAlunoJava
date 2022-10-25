@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import br.com.app.fatec.entities.Chamada;
+import br.com.app.fatec.entities.Usuario;
 
 public interface ChamadaRepository extends JpaRepository<Chamada, Long>{
 	@Query("select c from Chamada c "
@@ -14,4 +15,6 @@ public interface ChamadaRepository extends JpaRepository<Chamada, Long>{
 			+ "join a.materia m "
 			+ "where m.sigla in :materias and c.data >= :data")
 	List<Chamada> find(List<String> materias, Date data);
+	
+	List<Chamada> findByProfessor(Usuario professor);
 }

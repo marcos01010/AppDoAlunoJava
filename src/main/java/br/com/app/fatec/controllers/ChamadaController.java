@@ -39,6 +39,31 @@ public class ChamadaController {
 	@Autowired
 	AtividadeRespository atividadeRespository;
 	
+	@PostMapping("/presente")
+	public List<Usuario> buscarPresentes(HttpServletResponse response, Long chamadaID){
+		try {
+			if(chamadaID == null) {
+				return null;
+			}
+			
+			Optional<Chamada> chamada = repository.findById(chamadaID);		
+			if(chamada.isEmpty()) {
+				response.setStatus(HttpStatus.BAD_REQUEST.value());
+				return null;
+			}
+			
+			if(chamada.get().getAlunos().isEmpty()) {
+				response.setStatus(HttpStatus.NO_CONTENT.value());
+			}
+			
+			return chamada.get().getAlunos();
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			e.printStackTrace();
+			return null;
+		}		
+	}
+	
 	@PostMapping("/ativas")
 	public List<Chamada> findAll(HttpServletResponse response, @RequestBody List<String> siglas){
 		try {
@@ -63,8 +88,31 @@ public class ChamadaController {
 		}
 	}
 	
+	@PostMapping("/ativas/professor")
+	public List<Chamada> findAll(HttpServletResponse response, String hashChamada){
+		try {
+			Usuario professor = usuarioRepository.findByHashChamada(hashChamada);
+			
+			if(professor != null) {
+				List<Chamada> chamadas = repository.findByProfessor(professor);
+				if(chamadas.size() == 0) {
+					response.setStatus(HttpStatus.NO_CONTENT.value());
+					return null;
+				}
+				return chamadas;
+			}
+			
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			return null;
+		}
+	}
+	
 	@PostMapping
-	public boolean insert(HttpServletResponse response,@RequestBody Chamada chamada) {
+	public boolean insert(HttpServletResponse response, @RequestBody Chamada chamada) {
 		response.setCharacterEncoding("UTF-8");
 		try {
 			if(ChamadaService.validarChamada(chamada)) {
@@ -132,13 +180,13 @@ public class ChamadaController {
 	}
 	
 	@PostMapping("/resposta")
-	public Chamada resposta(Long chamadaID, Long usuarioID) {
-		if(chamadaID == null || usuarioID == null) {
+	public Chamada resposta(Long c, Long u) {
+		if(c == null || u == null) {
 			return null;
 		}
 		
-		Optional<Chamada> chamada = repository.findById(chamadaID);
-		Optional<Usuario> usuario = usuarioRepository.findById(usuarioID);
+		Optional<Chamada> chamada = repository.findById(c);
+		Optional<Usuario> usuario = usuarioRepository.findById(u);
 		
 		if(chamada.isPresent() && usuario.isPresent()) {
 			chamada.get().getAlunos().addAll(List.of(usuario.get()));
