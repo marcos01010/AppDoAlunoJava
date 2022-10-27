@@ -32,7 +32,17 @@ public class UsuarioController {
 	
 	@PostMapping("/novo")
 	public Usuario save(@RequestBody Usuario usuario){
-		return repository.save(usuario);
+		List<Usuario> u = null;
+		try {
+			u = repository.findByRa(usuario.getRa());
+			if(repository.findByRa(usuario.getRa()).isEmpty()) {
+				u = List.of(repository.save(usuario));
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return u.get(0);
 	}
 	
 	@PostMapping("/alterar")

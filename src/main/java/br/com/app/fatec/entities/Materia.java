@@ -2,6 +2,7 @@ package br.com.app.fatec.entities;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,8 +34,8 @@ public class Materia {
 	@ManyToOne
 	private Usuario professor;
 	
-	@ManyToMany(mappedBy = "materias")
-	@JsonIgnoreProperties("materias")
+	@ManyToMany(mappedBy = "materias", cascade = CascadeType.MERGE)
+	@JsonIgnoreProperties("alunos")
 	private List<Usuario> alunos;
 
 	public Materia() {

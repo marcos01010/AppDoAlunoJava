@@ -16,5 +16,5 @@ public interface ChamadaRepository extends JpaRepository<Chamada, Long>{
 			+ "where m.sigla in :materias and c.data >= :data")
 	List<Chamada> find(List<String> materias, Date data);
 	
-	List<Chamada> findByProfessor(Usuario professor);
+	List<Chamada> findByProfessorAndDataAfter(Usuario professor,Date date);
 }

@@ -34,7 +34,7 @@ public class Chamada {
 			joinColumns = @JoinColumn(name = "chamada_id", referencedColumnName = "id"),
 			inverseJoinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id")
 			)
-	@JsonIgnoreProperties("chamadas")
+	@JsonIgnoreProperties("alunos")
 	private List<Usuario> alunos;
 	
 	@OneToOne

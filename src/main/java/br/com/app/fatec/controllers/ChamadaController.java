@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.app.fatec.entities.Atividade;
 import br.com.app.fatec.entities.Chamada;
 import br.com.app.fatec.entities.Materia;
+import br.com.app.fatec.entities.Turno;
 import br.com.app.fatec.entities.Usuario;
 import br.com.app.fatec.repositories.AtividadeRespository;
 import br.com.app.fatec.repositories.ChamadaRepository;
 import br.com.app.fatec.repositories.MateriaRepository;
+import br.com.app.fatec.repositories.TurnoRepository;
 import br.com.app.fatec.repositories.UsuarioRepository;
 import br.com.app.fatec.service.ChamadaService;
 
@@ -38,6 +41,8 @@ public class ChamadaController {
 	MateriaRepository materiaRepository;
 	@Autowired
 	AtividadeRespository atividadeRespository;
+	@Autowired
+	TurnoRepository turnoRepository;
 	
 	@PostMapping("/presente")
 	public List<Usuario> buscarPresentes(HttpServletResponse response, Long chamadaID){
@@ -65,7 +70,7 @@ public class ChamadaController {
 	}
 	
 	@PostMapping("/ativas")
-	public List<Chamada> findAll(HttpServletResponse response, @RequestBody List<String> siglas){
+	public List<br.com.app.fatec.entities.delivery.Chamada> findAll(HttpServletResponse response, @RequestBody List<String> siglas){
 		try {
 			if(siglas != null && siglas.size() > 0) {
 				Calendar calendar = Calendar.getInstance();
@@ -75,7 +80,14 @@ public class ChamadaController {
 					response.setStatus(HttpStatus.NO_CONTENT.value());
 					return null;
 				}
-				return chamadas;
+				
+				return chamadas.stream().map(c ->{
+					return new br.com.app.fatec.entities.delivery.Chamada(c.getId(),
+							c.getAtividade().getMateria().getSigla(),
+							c.getAtividade().getMateria().getDescricao(),
+							c.getProfessor().getId(),
+							c.getProfessor().getNome());
+				}).collect(Collectors.toList());
 			}
 			
 			response.getWriter().println("Erro: Sem matérias para listar.");
@@ -91,10 +103,13 @@ public class ChamadaController {
 	@PostMapping("/ativas/professor")
 	public List<Chamada> findAll(HttpServletResponse response, String hashChamada){
 		try {
-			Usuario professor = usuarioRepository.findByHashChamada(hashChamada);
+			Usuario professor = usuarioRepository.findByHashChamada(hashChamada).get(0);
 			
 			if(professor != null) {
-				List<Chamada> chamadas = repository.findByProfessor(professor);
+				
+				List<Chamada> chamadas = 
+						repository.findByProfessorAndDataAfter(professor, 
+								Calendar.getInstance().getTime());
 				if(chamadas.size() == 0) {
 					response.setStatus(HttpStatus.NO_CONTENT.value());
 					return null;
@@ -116,10 +131,11 @@ public class ChamadaController {
 		response.setCharacterEncoding("UTF-8");
 		try {
 			if(ChamadaService.validarChamada(chamada)) {
-				Usuario professor = usuarioRepository.findByHashChamada(chamada.getProfessor().getHashChamada());
+				Usuario professor = usuarioRepository.findByHashChamada(chamada.getProfessor().getHashChamada()).get(0);
 				Atividade novaAtividade = null;
+				Turno turno = turnoRepository.findById(chamada.getAtividade().getMateria().getTurno().getId()).get();
 				Materia novaMateria = materiaRepository
-						.findBySigla(chamada.getAtividade().getMateria().getSigla()).get(0);
+						.findBySiglaAndTurno(chamada.getAtividade().getMateria().getSigla(), turno).get(0);
 				boolean isAtividadeCadastrada = false;
 				boolean isMateriaCadastrada = novaMateria != null;
 				boolean isProfessor = professor != null;

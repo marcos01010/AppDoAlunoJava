@@ -37,7 +37,7 @@ public class Usuario {
 	private Perfil perfil;
 	
 	@ManyToMany(mappedBy = "alunos")
-	@JsonIgnoreProperties("alunos")
+	@JsonIgnoreProperties("chamadas")
 	private List<Chamada> chamadas;
 	
 	@ManyToMany
