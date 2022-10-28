@@ -1,6 +1,7 @@
 package br.com.app.fatec.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.app.fatec.entities.Sala;
 import br.com.app.fatec.repositories.SalaRepository;
+import br.com.app.fatec.entities.delivery.Local;
 
 @RestController
 @RequestMapping("/sala")
@@ -21,8 +23,22 @@ public class SalaController {
 	private SalaRepository repository;
 	
 	@GetMapping
-	public List<Sala> findAll(){
-		return repository.findByAtivoTrue();
+	public List<Local> findAll(){
+		List<Sala> sala = repository.findByAtivoTrue();
+		
+		return sala.stream().map(s ->{
+			Local local = new Local();
+			
+			if(s.getPredio() != null) {
+				local.setPredioId(s.getPredio().getId());
+				local.setDescricaoPredio(s.getPredio().getDescricao());
+			}
+			
+			local.setId(s.getId());
+			local.setNumero(s.getNumero());
+			
+			return local;
+		}).collect(Collectors.toList());
 	}
 	
 	@PostMapping

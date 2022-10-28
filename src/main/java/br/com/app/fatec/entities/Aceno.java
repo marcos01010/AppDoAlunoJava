@@ -2,7 +2,9 @@ package br.com.app.fatec.entities;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,10 +22,12 @@ public class Aceno {
 	@ManyToOne
 	private Usuario usuario;
 	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Atividade atividade;
 	
 	private Date data;
+	
+	private String descricao;
 
 	public Aceno(Sala sala, Usuario usuario, Date data, Atividade atividade) {
 		super();
@@ -75,6 +79,14 @@ public class Aceno {
 
 	public void setAtividade(Atividade atividade) {
 		this.atividade = atividade;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 	
 }

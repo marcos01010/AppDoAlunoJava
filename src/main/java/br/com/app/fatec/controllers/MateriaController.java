@@ -1,6 +1,7 @@
 package br.com.app.fatec.controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,28 @@ public class MateriaController {
 	UsuarioRepository usuarioRepository;
 	
 	@GetMapping
-	public List<Materia> findAll(){
-		return repository.findAll();
+	public List<br.com.app.fatec.entities.delivery.Materia> findAll(){
+		List<Materia> list = repository.findAll();
+		System.out.println(list);
+		
+		return list.stream()
+				.map(m ->{
+					br.com.app.fatec.entities.delivery.Materia materiaD  = new br.com.app.fatec.entities.delivery.Materia();
+					
+					if(m.getProfessor() != null) {
+						br.com.app.fatec.entities.delivery.Usuario professor = new br.com.app.fatec.entities.delivery.Usuario();
+						professor.setHashChamada(m.getProfessor().getHashChamada());
+						professor.setNome(m.getProfessor().getNome());
+						professor.setSobreNome(m.getProfessor().getNome());
+						materiaD.setProfessor(professor);
+					}
+					
+					materiaD.setSigla(m.getSigla());
+					materiaD.setDescricao(m.getDescricao());
+					materiaD.setTurnoID(m.getTurno().getId());
+					
+					return materiaD;					
+				}).collect(Collectors.toList());
 	}
 	
 	@PostMapping("/assumida")
@@ -56,15 +77,28 @@ public class MateriaController {
 				return null;				
 			}
 			
-			return repository.findByProfessor(professor).stream()
-					.map(m ->{
-						return new br.com.app.fatec.entities.delivery.Materia(
-								m.getSigla(),
-								m.getDescricao(),
-								m.getProfessor().getId(),
-								m.getProfessor().getNome(),
-								m.getTurno().getId());
-					}).collect(Collectors.toList());		
+			List<Materia> materias = repository.findByProfessor(professor);
+			List<br.com.app.fatec.entities.delivery.Materia> materiasD = new ArrayList<>();
+			
+			for(Materia m: materias) {
+				br.com.app.fatec.entities.delivery.Materia materiaD = new br.com.app.fatec.entities.delivery.Materia();
+				br.com.app.fatec.entities.delivery.Usuario u = new br.com.app.fatec.entities.delivery.Usuario();
+				
+				if(m.getProfessor() != null) {
+					u.setHashChamada(m.getProfessor().getHashChamada());
+					u.setNome(m.getProfessor().getNome());
+					u.setSobreNome(m.getProfessor().getSobreNome());
+				}
+				
+				materiaD.setProfessor(u);
+				materiaD.setDescricao(m.getDescricao());
+				materiaD.setSigla(m.getSigla());
+				materiaD.setTurnoID(m.getTurno().getId());
+				
+				materiasD.add(materiaD);
+			}
+			
+			return materiasD;
 		} catch (IOException e) {
 			e.printStackTrace();
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -73,15 +107,43 @@ public class MateriaController {
 	}
 	
 	@PostMapping
-	public Materia findById(Long id) {
-		return repository.findById(id).orElse(null);
+	public br.com.app.fatec.entities.delivery.Materia findById(Long id) {
+		Materia m = repository.findById(id).orElse(null);
+		br.com.app.fatec.entities.delivery.Usuario u = new br.com.app.fatec.entities.delivery.Usuario();
+		
+		if(m.getProfessor() != null) {
+			u.setHashChamada(m.getProfessor().getHashChamada());
+			u.setNome(m.getProfessor().getNome());
+			u.setSobreNome(m.getProfessor().getSobreNome());
+		}
+		
+		return new br.com.app.fatec.entities.delivery.Materia(
+				m.getSigla(),
+				m.getDescricao(),
+				u,
+				m.getProfessor().getNome(),
+				m.getTurno().getId());
 	}
 	
 	@PostMapping("/novo")
-	public Materia insert(String s, String d, Long t) {
+	public br.com.app.fatec.entities.delivery.Materia insert(String s, String d, Long t) {
 		try {
 			Turno turno = turnoRepository.findById(t).orElseThrow();
-			return repository.save(new Materia(s, d, turno));
+			Materia m = repository.save(new Materia(s, d, turno));
+			br.com.app.fatec.entities.delivery.Usuario u = new br.com.app.fatec.entities.delivery.Usuario();
+			
+			if(m.getProfessor() != null) {
+				u.setHashChamada(m.getProfessor().getHashChamada());
+				u.setNome(m.getProfessor().getNome());
+				u.setSobreNome(m.getProfessor().getSobreNome());
+			}
+			
+			return new br.com.app.fatec.entities.delivery.Materia(
+					m.getSigla(),
+					m.getDescricao(),
+					u,
+					m.getProfessor().getNome(),
+					m.getTurno().getId());
 		} catch (Exception e) {
 			return null;
 		}
@@ -143,9 +205,23 @@ public class MateriaController {
 	}
 	
 	@PostMapping("/alterar")
-	public Materia alterar(Materia materia) {
+	public br.com.app.fatec.entities.delivery.Materia alterar(Materia materia) {
 		if (materia.getId() != null && materia.getId() != 0L) {
-			return repository.save(materia);
+			Materia m = repository.save(materia);
+			br.com.app.fatec.entities.delivery.Usuario u = new br.com.app.fatec.entities.delivery.Usuario();
+			
+			if(m.getProfessor() != null) {
+				u.setHashChamada(m.getProfessor().getHashChamada());
+				u.setNome(m.getProfessor().getNome());
+				u.setSobreNome(m.getProfessor().getSobreNome());
+			}
+			
+			return new br.com.app.fatec.entities.delivery.Materia(
+					m.getSigla(),
+					m.getDescricao(),
+					u,
+					m.getProfessor().getNome(),
+					m.getTurno().getId());
 		}else {
 			return null;
 		}

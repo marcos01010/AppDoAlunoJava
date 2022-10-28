@@ -3,9 +3,22 @@ package br.com.app.fatec.entities.delivery;
 public class Materia {
 	private String sigla;
 	private String descricao;
-	private Long professorId;
+	private Usuario professor;
 	private String nomeProfessor;
 	private Long turnoID;
+	
+	public Materia(String sigla, String descricao, Usuario professor, String nomeProfessor, Long turnoID) {
+		super();
+		this.sigla = sigla;
+		this.descricao = descricao;
+		this.professor = professor;
+		this.nomeProfessor = nomeProfessor;
+		this.turnoID = turnoID;
+	}
+
+	public Materia() {
+	}
+	
 	public String getSigla() {
 		return sigla;
 	}
@@ -18,12 +31,15 @@ public class Materia {
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
-	public Long getProfessorId() {
-		return professorId;
+	
+	public Usuario getProfessor() {
+		return professor;
 	}
-	public void setProfessorId(Long professorId) {
-		this.professorId = professorId;
+
+	public void setProfessor(Usuario professor) {
+		this.professor = professor;
 	}
+
 	public String getNomeProfessor() {
 		return nomeProfessor;
 	}
@@ -36,14 +52,4 @@ public class Materia {
 	public void setTurnoID(Long turnoID) {
 		this.turnoID = turnoID;
 	}
-	public Materia(String sigla, String descricao, Long professorId, String nomeProfessor, Long turnoID) {
-		super();
-		this.sigla = sigla;
-		this.descricao = descricao;
-		this.professorId = professorId;
-		this.nomeProfessor = nomeProfessor;
-		this.turnoID = turnoID;
-	}
-
-	
 }

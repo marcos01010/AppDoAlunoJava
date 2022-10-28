@@ -1,8 +1,12 @@
 package br.com.app.fatec.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,17 +25,35 @@ public class UsuarioController {
 	UsuarioRepository repository;
 	
 	@GetMapping
-	public List<Usuario> findAll(){
-		return repository.findAll();
+	public br.com.app.fatec.entities.delivery.Usuario findAll(){
+		List<Usuario> u = repository.findAll();
+		return u.stream().map(usuario1 ->{
+			return new br.com.app.fatec.entities.delivery.Usuario(
+					usuario1.getId(),
+					usuario1.getNome(),
+					usuario1.getSobreNome(),
+					usuario1.getPerfil().getId(),
+					usuario1.getHashChamada(),
+					usuario1.getRa()
+					);
+		}).collect(Collectors.toList()).get(0);
 	}
 	
 	@PostMapping
-	public Usuario findById(Long id) {
-		return repository.findById(id).orElse(null);
+	public br.com.app.fatec.entities.delivery.Usuario findById(Long id) {
+		Usuario u = repository.findById(id).orElse(null);
+		return new br.com.app.fatec.entities.delivery.Usuario(
+				u.getId(),
+				u.getNome(),
+				u.getSobreNome(),
+				u.getPerfil().getId(),
+				u.getHashChamada(),
+				u.getRa()
+				);
 	}
 	
 	@PostMapping("/novo")
-	public Usuario save(@RequestBody Usuario usuario){
+	public br.com.app.fatec.entities.delivery.Usuario save(HttpServletResponse response, @RequestBody Usuario usuario){
 		List<Usuario> u = null;
 		try {
 			u = repository.findByRa(usuario.getRa());
@@ -40,14 +62,36 @@ public class UsuarioController {
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		}
 		
-		return u.get(0);
+		if(u == null) {
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		}
+		
+		return u.stream().map(usuario1 ->{
+			return new br.com.app.fatec.entities.delivery.Usuario(
+					usuario1.getId(),
+					usuario1.getNome(),
+					usuario1.getSobreNome(),
+					usuario1.getPerfil().getId(),
+					usuario1.getHashChamada(),
+					usuario1.getRa()
+					);
+		}).collect(Collectors.toList()).get(0);		
 	}
 	
 	@PostMapping("/alterar")
-	public Usuario alterar(@RequestBody Usuario usuario){
-		return repository.save(usuario);
+	public br.com.app.fatec.entities.delivery.Usuario alterar(@RequestBody Usuario usuario){
+		Usuario u = repository.save(usuario);
+		return new br.com.app.fatec.entities.delivery.Usuario(
+				u.getId(),
+				u.getNome(),
+				u.getSobreNome(),
+				u.getPerfil().getId(),
+				u.getHashChamada(),
+				u.getRa()
+				);
 	}
 	
 	@DeleteMapping

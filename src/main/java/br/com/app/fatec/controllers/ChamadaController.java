@@ -45,7 +45,7 @@ public class ChamadaController {
 	TurnoRepository turnoRepository;
 	
 	@PostMapping("/presente")
-	public List<Usuario> buscarPresentes(HttpServletResponse response, Long chamadaID){
+	public List<br.com.app.fatec.entities.delivery.Usuario> buscarPresentes(HttpServletResponse response, Long chamadaID){
 		try {
 			if(chamadaID == null) {
 				return null;
@@ -61,7 +61,18 @@ public class ChamadaController {
 				response.setStatus(HttpStatus.NO_CONTENT.value());
 			}
 			
-			return chamada.get().getAlunos();
+			return chamada.get().getAlunos().stream().map(usuario1 -> {
+				return new br.com.app.fatec.entities.delivery.Usuario(
+						usuario1.getId(),
+						usuario1.getNome(),
+						usuario1.getSobreNome(),
+						usuario1.getPerfil().getId(),
+						usuario1.getHashChamada(),
+						usuario1.getRa()
+						);				
+			}).collect(Collectors.toList());
+			
+			
 		} catch (Exception e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			e.printStackTrace();
@@ -101,7 +112,7 @@ public class ChamadaController {
 	}
 	
 	@PostMapping("/ativas/professor")
-	public List<Chamada> findAll(HttpServletResponse response, String hashChamada){
+	public List<br.com.app.fatec.entities.delivery.Chamada> findAll(HttpServletResponse response, String hashChamada){
 		try {
 			Usuario professor = usuarioRepository.findByHashChamada(hashChamada).get(0);
 			
@@ -114,7 +125,13 @@ public class ChamadaController {
 					response.setStatus(HttpStatus.NO_CONTENT.value());
 					return null;
 				}
-				return chamadas;
+				return chamadas.stream().map(c ->{
+					return new br.com.app.fatec.entities.delivery.Chamada(c.getId(),
+							c.getAtividade().getMateria().getSigla(),
+							c.getAtividade().getMateria().getDescricao(),
+							c.getProfessor().getId(),
+							c.getProfessor().getNome());
+				}).collect(Collectors.toList());
 			}
 			
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -195,8 +212,10 @@ public class ChamadaController {
 		}
 	}
 	
+	
+	
 	@PostMapping("/resposta")
-	public Chamada resposta(Long c, Long u) {
+	public br.com.app.fatec.entities.delivery.Chamada resposta(Long c, Long u) {
 		if(c == null || u == null) {
 			return null;
 		}
@@ -210,7 +229,14 @@ public class ChamadaController {
 			return null;
 		}
 		
-		return repository.save(chamada.get());
+		Chamada c1 = repository.save(chamada.get());
+		
+		
+		return new br.com.app.fatec.entities.delivery.Chamada(c1.getId(),
+				c1.getAtividade().getMateria().getSigla(),
+				c1.getAtividade().getMateria().getDescricao(),
+				c1.getProfessor().getId(),
+				c1.getProfessor().getNome());
 	}
 	
 	@DeleteMapping

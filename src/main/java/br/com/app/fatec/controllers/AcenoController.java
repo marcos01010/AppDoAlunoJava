@@ -3,6 +3,7 @@ package br.com.app.fatec.controllers;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,7 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.app.fatec.entities.Aceno;
+import br.com.app.fatec.entities.Materia;
+import br.com.app.fatec.entities.delivery.AcenoDelivery;
+import br.com.app.fatec.entities.delivery.Local;
 import br.com.app.fatec.repositories.AcenoRepository;
+import br.com.app.fatec.repositories.MateriaRepository;
 import br.com.app.fatec.service.AcenoService;
 
 @RequestMapping("/aceno")
@@ -26,8 +31,11 @@ public class AcenoController {
 	@Autowired
 	private AcenoRepository repository;
 	
+	@Autowired
+	private MateriaRepository materiaRepository;
+	
 	@GetMapping
-	private List<Aceno> find(HttpServletResponse response, Long id){
+	private List<AcenoDelivery> find(HttpServletResponse response, Long id){
 		try {
 			response.setCharacterEncoding("UTF-8");
 			if(id == null || id == 0L) {
@@ -41,8 +49,19 @@ public class AcenoController {
 			
 			List<Aceno> acenos = repository.find(id, calendar.getTime());
 			
-			if(acenos.size() > 0) {
-				return acenos;
+			if(acenos.size() > 0) {				
+				return acenos.stream().map(a ->{
+					Local local = new Local();					
+					local.setNumero(a.getSala().getNumero());
+					local.setDescricaoPredio(a.getSala().getPredio().getDescricao());
+					
+					AcenoDelivery acenoDelivery = new AcenoDelivery();
+					acenoDelivery.setDescricao(a.getDescricao());
+					acenoDelivery.setLocal(local);
+					acenoDelivery.setNomeUsuario(a.getUsuario().getNome());
+					
+					return acenoDelivery;
+				}).collect(Collectors.toList());
 			}else {
 				response.getWriter().println("Erro: Ninguém acenou para você ainda.");
 				response.setStatus(HttpStatus.NO_CONTENT.value());
@@ -57,29 +76,34 @@ public class AcenoController {
 	}
 	
 	@PostMapping
-	private Aceno novo(HttpServletResponse response, @RequestBody Aceno aceno) {
+	private boolean novo(HttpServletResponse response, @RequestBody Aceno aceno) {
 		try {
 			response.setCharacterEncoding("UTF-8");
+			
+			Materia materia = materiaRepository.findBySiglaAndTurno(aceno.getAtividade().getMateria().getSigla(),
+					aceno.getAtividade().getMateria().getTurno()).get(0);
+			
+			aceno.getAtividade().setMateria(materia);
 			
 			if(AcenoService.validarAceno(aceno)) {
 				aceno.setData(Calendar.getInstance().getTime());
 				Aceno a = repository.save(aceno);
 				if(a != null) {
-					return a;
+					return true;
 				}else {
 					response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());				
 					response.getWriter().println("Erro: Não foi	completar a operação.");
-					return null;
+					return false;
 				}
 			}
 			
 			response.setStatus(HttpStatus.BAD_REQUEST.value());				
 			response.getWriter().println("Erro: " + AcenoService.getCausa());
-			return null;
+			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-			return null;
+			return false;
 		}
 	}
 	
