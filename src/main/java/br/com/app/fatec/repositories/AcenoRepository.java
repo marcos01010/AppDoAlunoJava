@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import br.com.app.fatec.entities.Aceno;
 
 public interface AcenoRepository extends JpaRepository<Aceno, Long> {
-	@Query("select a from Aceno a "
+	@Query("select distinct a from Aceno a "
 			+ "join a.atividade at "
 			+ "join at.materia m "
 			+ "join m.alunos al "

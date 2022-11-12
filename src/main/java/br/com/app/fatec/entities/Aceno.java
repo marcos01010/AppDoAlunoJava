@@ -4,7 +4,6 @@ import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,6 +27,8 @@ public class Aceno {
 	private Date data;
 	
 	private String descricao;
+	
+	private Integer contator;
 
 	public Aceno(Sala sala, Usuario usuario, Date data, Atividade atividade) {
 		super();
@@ -87,6 +88,14 @@ public class Aceno {
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
+	}
+
+	public Integer getContator() {
+		return contator;
+	}
+
+	public void setContator(Integer contator) {
+		this.contator = contator;
 	}
 	
 }

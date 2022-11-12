@@ -59,6 +59,9 @@ public class AcenoController {
 					acenoDelivery.setDescricao(a.getDescricao());
 					acenoDelivery.setLocal(local);
 					acenoDelivery.setNomeUsuario(a.getUsuario().getNome());
+					acenoDelivery.setNomeMateria(a.getAtividade().getMateria().getDescricao());
+					acenoDelivery.setConfirmacoes(a.getContator());
+					acenoDelivery.setId(a.getId());
 					
 					return acenoDelivery;
 				}).collect(Collectors.toList());
@@ -75,6 +78,13 @@ public class AcenoController {
 		}
 	}
 	
+	@PostMapping("/confirmar")
+	private void confirmar(Long id) {
+		Aceno aceno = repository.findById(id).get();
+		aceno.setContator(aceno.getContator() + 1);
+		repository.save(aceno);
+	}
+	
 	@PostMapping
 	private boolean novo(HttpServletResponse response, @RequestBody Aceno aceno) {
 		try {
@@ -87,6 +97,7 @@ public class AcenoController {
 			
 			if(AcenoService.validarAceno(aceno)) {
 				aceno.setData(Calendar.getInstance().getTime());
+				aceno.setContator(0);
 				Aceno a = repository.save(aceno);
 				if(a != null) {
 					return true;
