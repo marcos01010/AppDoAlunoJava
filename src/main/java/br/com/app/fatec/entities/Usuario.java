@@ -135,6 +135,9 @@ public class Usuario {
 
 	public void setHashChamada(String hashChamada) {
 		this.hashChamada = hashChamada;
-	}	
+	}
 	
+	public String getNomeCompleto() {
+		return nome + " " + sobreNome;
+	}	
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.app.fatec.entities.Atividade;
 import br.com.app.fatec.entities.Chamada;
 import br.com.app.fatec.entities.Materia;
+import br.com.app.fatec.entities.Sala;
 import br.com.app.fatec.entities.Turno;
 import br.com.app.fatec.entities.Usuario;
 import br.com.app.fatec.repositories.AtividadeRespository;
@@ -247,5 +248,10 @@ public class ChamadaController {
 		}catch (Exception e) {
 			return false;
 		}
+	}
+	
+	@PostMapping("/teste")
+	public void teste(@RequestBody List<Sala> salas) {
+		String s = "";
 	}
 }

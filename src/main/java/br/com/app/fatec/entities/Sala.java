@@ -38,6 +38,8 @@ public class Sala {
 	@JsonIgnoreProperties("salas")
 	private List<Equipamento> equipamentos;
 	
+	private String descricao;
+	
 	public Sala() {
 	}
 	
@@ -108,4 +110,13 @@ public class Sala {
 	public void setEquipamentos(List<Equipamento> equipamentos) {
 		this.equipamentos = equipamentos;
 	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
+	}
+	
 }

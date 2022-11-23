@@ -32,6 +32,7 @@ public class SalaController {
 			if(s.getPredio() != null) {
 				local.setPredioId(s.getPredio().getId());
 				local.setDescricaoPredio(s.getPredio().getDescricao());
+				local.setDescricaoSala(s.getDescricao());
 			}
 			
 			local.setId(s.getId());
